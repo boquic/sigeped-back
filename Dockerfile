@@ -20,4 +20,4 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --chown=node:node . .
 ENV PORT=4000
 EXPOSE 4000
-CMD sh -c "npx prisma migrate deploy && node src/server.js"
+CMD sh -c "npx prisma migrate deploy && node server.js"
