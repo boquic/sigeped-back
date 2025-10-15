@@ -34,3 +34,30 @@ Copia `.env.example` a `.env` y completa los valores necesarios:
 
 ```sh
 cp [.env.example](http://_vscodecontentref_/0) .env
+
+Variables importantes:
+
+DATABASE_URL: URL de conexión a PostgreSQL
+JWT<vscode_annotation details='%5B%7B%22title%22%3A%22hardcoded-credentials%22%2C%22description%22%3A%22Embedding%20credentials%20in%20source%20code%20risks%20unauthorized%20access%22%7D%5D'>_ACCESS</vscode_annotation>_SECRET, JWT_REFRESH_SECRET: Secretos para JWT
+MONGODB_URI: URL de conexión a MongoDB (para pedidos)
+Opcional: SMTP para recuperación de contraseña
+Instalación
+Migraciones y generación de Prisma
+Ejecución en desarrollo
+Ejecución en producción
+Pruebas
+Documentación API
+Disponible en http://localhost:4000/docs (Swagger UI).
+
+Docker
+Puedes levantar el stack completo (API + PostgreSQL) con:
+
+Scripts útiles
+npm run prisma:migrate: Ejecuta migraciones de Prisma
+npm run prisma:generate: Genera el cliente Prisma
+npm run lint: Linting del código
+npm run format: Formatea el código con Prettier
+Licencia
+MIT
+
+Para dudas o mejoras, abre un issue o PR.

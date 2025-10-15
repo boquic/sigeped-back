@@ -1,7 +1,12 @@
-# Dockerfile (Node 22.16.0 + npm)
-FROM node:22.16.0-alpine AS base
+## Dockerfile (Node 22.16.0 + npm) - Debian based to avoid musl/native addon issues
+FROM node:22.16.0-slim AS base
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Optionally install OpenSSL (Prisma runtime depends on it)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl \
+  && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 COPY package*.json ./
