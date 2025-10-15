@@ -1,0 +1,76 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ROLES {
+  id_rol      Int      @id @default(autoincrement())
+  nombre_rol  String   @unique
+  descripcion String?
+  permisos    Json?
+  created_at  DateTime @default(now())
+
+  USUARIOS    USUARIOS[]
+
+  @@map("roles")
+}
+
+model USUARIOS {
+  id_usuario    Int       @id @default(autoincrement())
+  username      String    @unique
+  password_hash String
+  email         String    @unique
+  telefono      String?
+  id_rol        Int
+  activo        Boolean   @default(true)
+  ultimo_acceso DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  rol ROLES @relation(fields: [id_rol], references: [id_rol], onUpdate: Cascade, onDelete: Restrict)
+
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("usuarios")
+}
+
+model RefreshToken {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  token_hash     String    @unique
+  is_revoked     Boolean   @default(false)
+  expires_at     DateTime
+  created_at     DateTime  @default(now())
+  replaced_by_id Int?
+  user_agent     String?
+  ip             String?
+
+  user       USUARIOS      @relation(fields: [userId], references: [id_usuario], onDelete: Cascade)
+  replacedBy RefreshToken? @relation("TokenReplacement", fields: [replaced_by_id], references: [id])
+  replaced   RefreshToken[] @relation("TokenReplacement")
+
+  @@index([userId])
+  @@index([expires_at])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  token_hash String   @unique
+  expires_at DateTime
+  used_at    DateTime?
+
+  user USUARIOS @relation(fields: [userId], references: [id_usuario], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires_at])
+  @@map("password_reset_tokens")
+}
