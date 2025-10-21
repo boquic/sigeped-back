@@ -6,10 +6,9 @@ Backend para SIGEPED: sistema de gestión de pedidos, autenticación y administr
 
 - Node.js (Express)
 - PostgreSQL (Prisma ORM)
-- MongoDB (Mongoose, solo para pedidos)
 - Autenticación JWT (access/refresh tokens)
 - Rate limiting, roles y permisos
-- Swagger/OpenAPI docs
+- Swagger/OpenAPI (docs en `/docs`)
 
 ## Estructura del proyecto
 
@@ -19,7 +18,7 @@ Backend para SIGEPED: sistema de gestión de pedidos, autenticación y administr
   - `controllers/`: Lógica de endpoints
   - `db/`: Cliente Prisma
   - `middlewares/`: Middlewares de autenticación, errores, rate limit, roles
-  - `models/`: Modelos de datos (Mongoose para pedidos)
+  - `models/`: Modelo `Pedido` (Mongoose). Nota: conexión a MongoDB no está habilitada por defecto.
   - `routes/`: Definición de rutas
   - `schemas/`: Validaciones Zod
   - `seed/`: Script de seed inicial
@@ -28,36 +27,87 @@ Backend para SIGEPED: sistema de gestión de pedidos, autenticación y administr
 - `/docs`: Documentación OpenAPI (Swagger)
 - `/tests/e2e`: Pruebas end-to-end (Jest + Supertest)
 
+## Requerimientos
+
+- Node.js 22.16.0
+- PostgreSQL 16 (o via Docker)
+
 ## Configuración
 
-Copia `.env.example` a `.env` y completa los valores necesarios:
+1. Copia `.env.example` a `.env` y ajusta los valores:
 
 ```sh
-cp [.env.example](http://_vscodecontentref_/0) .env
+cp .env.example .env
+```
 
-Variables importantes:
+- `PORT`: Puerto del API (por defecto `4000`).
+- `DATABASE_URL`: URL de PostgreSQL.
+- `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`.
+- `ACCESS_TOKEN_TTL`, `REFRESH_TOKEN_TTL`.
+- `CORS_ORIGINS`, `FRONTEND_BASE_URL`.
+- SMTP opcional para recuperación de contraseña: `SMTP_*`.
+- Seed opcional: `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_ADMIN_USERNAME`.
 
-DATABASE_URL: URL de conexión a PostgreSQL
-JWT<vscode_annotation details='%5B%7B%22title%22%3A%22hardcoded-credentials%22%2C%22description%22%3A%22Embedding%20credentials%20in%20source%20code%20risks%20unauthorized%20access%22%7D%5D'>_ACCESS</vscode_annotation>_SECRET, JWT_REFRESH_SECRET: Secretos para JWT
-MONGODB_URI: URL de conexión a MongoDB (para pedidos)
-Opcional: SMTP para recuperación de contraseña
-Instalación
-Migraciones y generación de Prisma
-Ejecución en desarrollo
-Ejecución en producción
-Pruebas
-Documentación API
-Disponible en http://localhost:4000/docs (Swagger UI).
+## Instalación
 
-Docker
-Puedes levantar el stack completo (API + PostgreSQL) con:
+```sh
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+```
 
-Scripts útiles
-npm run prisma:migrate: Ejecuta migraciones de Prisma
-npm run prisma:generate: Genera el cliente Prisma
-npm run lint: Linting del código
-npm run format: Formatea el código con Prettier
-Licencia
-MIT
+## Ejecución
+
+- Desarrollo:
+
+```sh
+npm run dev
+```
+
+- Producción:
+
+```sh
+npm start
+```
+
+El servidor expone:
+
+- `GET /` salud básico
+- `GET /docs` Swagger UI (carga `docs/openapi.yaml`)
+- Rutas: `/auth`, `/users`, `/admin`
+
+Puerto por defecto: `http://localhost:4000` (configurable con `PORT`).
+
+## Seed de datos (opcional)
+
+Con variables `SEED_*` configuradas en `.env`, puedes ejecutar:
+
+```sh
+node -e "require('./src/seed').seed().then(()=>console.log('seed ok')).catch((e)=>{console.error(e);process.exit(1);})"
+```
+
+## Docker
+
+Levanta PostgreSQL + API:
+
+```sh
+docker compose up -d --build
+```
+
+- API: `http://localhost:4000`
+- PostgreSQL: `localhost:5432` (usuario `postgres`, password `postgres`, DB `appdb`)
+
+## Scripts útiles
+
+- `npm run prisma:migrate`: Ejecuta migraciones Prisma
+- `npm run prisma:generate`: Genera el cliente Prisma
+- `npm run test`: Pruebas unitarias
+- `npm run test:e2e`: Pruebas E2E
+- `npm run lint`: Linting del código
+- `npm run format`: Formatea el código (Prettier)
+
+## Licencia
+
+ISC
 
 Para dudas o mejoras, abre un issue o PR.
