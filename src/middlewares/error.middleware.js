@@ -1,5 +1,5 @@
 // src/middlewares/error.middleware.js
-function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, next) {
   const status = err.status || 500;
   const code = err.code || 'InternalError';
   const message = err.message || 'Internal Server Error';
@@ -12,5 +12,3 @@ function errorHandler(err, req, res, next) {
 
   res.status(status).json({ error: { code, message, ...(details ? { details } : {}) } });
 }
-
-module.exports = { errorHandler };

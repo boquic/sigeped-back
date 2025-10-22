@@ -1,0 +1,19 @@
+# Prevent host artifacts from being copied into the image
+node_modules/
+.npmrc
+npm-debug.log*
+.yarn*
+.pnpm-store/
+
+# VCS and metadata
+.git/
+.gitignore
+
+# Env and local configs
+.env
+.env.*
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/

@@ -1,9 +1,11 @@
 // src/server.js
-require('dotenv').config();
-const { config } = require('./config/env');
-const { logger } = require('./config/logger');
-const app = require('./app');
-const { seed } = require('./seed');
+import dotenv from 'dotenv';
+import { config } from './config/env.js';
+import { logger } from './config/logger.js';
+import app from './app.js';
+import { seed } from './seed/index.js';
+
+dotenv.config();
 
 async function start() {
   try {

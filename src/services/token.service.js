@@ -1,13 +1,13 @@
 // src/services/token.service.js
-const crypto = require('crypto');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { prisma } = require('../db/prismaClient');
-const { config } = require('../config/env');
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../db/prismaClient.js';
+import { config } from '../config/env.js';
 
 const SALT_ROUNDS = 11;
 
-function signAccessToken(user) {
+export function signAccessToken(user) {
   const payload = {
     id_usuario: user.id_usuario,
     id_rol: user.id_rol,
@@ -29,7 +29,7 @@ async function verifyHash(value, hashed) {
   return bcrypt.compare(value, hashed);
 }
 
-async function issueRefreshToken(userId, userAgent, ip) {
+export async function issueRefreshToken(userId, userAgent, ip) {
   const tokenPlain = generateRefreshTokenString();
   const tokenHash = await hash(tokenPlain);
   const expires = new Date(Date.now() + parseTtlMs(config.jwt.refreshTtl));
@@ -45,7 +45,7 @@ async function issueRefreshToken(userId, userAgent, ip) {
   return tokenPlain;
 }
 
-function parseTtlMs(ttl) {
+export function parseTtlMs(ttl) {
   // supports m,h,d suffix
   const m = ttl.match(/^(\d+)([smhd])$/);
   if (!m) return 15 * 60 * 1000;
@@ -55,7 +55,7 @@ function parseTtlMs(ttl) {
   return n * mult;
 }
 
-async function rotateRefreshToken(oldPlain, userAgent, ip) {
+export async function rotateRefreshToken(oldPlain, userAgent, ip) {
   const now = new Date();
   const tokens = await prisma.refreshToken.findMany({ where: { is_revoked: false, expires_at: { gt: now } } });
   // find matching by comparing hashes
@@ -88,7 +88,7 @@ async function rotateRefreshToken(oldPlain, userAgent, ip) {
   return { userId: matched.userId, refreshToken: newPlain };
 }
 
-async function revokeTokenFamily(plain) {
+export async function revokeTokenFamily(plain) {
   // when reuse detected, revoke all active tokens for that user even if the presented token was already revoked
   const tokens = await prisma.refreshToken.findMany();
   for (const t of tokens) {
@@ -99,7 +99,7 @@ async function revokeTokenFamily(plain) {
   }
 }
 
-async function revokeToken(plain) {
+export async function revokeToken(plain) {
   const tokens = await prisma.refreshToken.findMany({ where: { is_revoked: false } });
   for (const t of tokens) {
     if (await verifyHash(plain, t.token_hash)) {
@@ -110,11 +110,4 @@ async function revokeToken(plain) {
   return false;
 }
 
-module.exports = {
-  signAccessToken,
-  issueRefreshToken,
-  rotateRefreshToken,
-  revokeToken,
-  revokeTokenFamily,
-  parseTtlMs,
-};
+

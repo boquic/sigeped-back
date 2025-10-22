@@ -1,7 +1,7 @@
 // src/middlewares/rateLimit.js
-const rateLimit = require('express-rate-limit');
-const { config } = require('../config/env');
-const { logger } = require('../config/logger');
+import rateLimit from 'express-rate-limit';
+import { config } from '../config/env.js';
+import { logger } from '../config/logger.js';
 
 function build429Handler(label) {
   return function handler(req, res, _next, _options) {
@@ -47,7 +47,7 @@ function build429Handler(label) {
 const isDev = config.nodeEnv === 'development';
 
 // Login limiter
-const loginLimiter = isDev
+export const loginLimiter = isDev
   ? rateLimit({
       windowMs: 5 * 60 * 1000, // 5 minutes
       max: 50,
@@ -71,7 +71,7 @@ const loginLimiter = isDev
     });
 
 // Forgot password limiter (kept per-IP; could be extended similarly)
-const forgotPasswordLimiter = isDev
+export const forgotPasswordLimiter = isDev
   ? rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 30,
@@ -87,4 +87,4 @@ const forgotPasswordLimiter = isDev
       handler: build429Handler('forgot-password'),
     });
 
-module.exports = { loginLimiter, forgotPasswordLimiter };
+

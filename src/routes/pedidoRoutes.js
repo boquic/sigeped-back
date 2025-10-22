@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import { crearPedido, obtenerPedidos } from '../controllers/pedidoController.js';
+
 const router = express.Router();
-const { crearPedido, obtenerPedidos } = require('../controllers/pedidoController'); // ← ¡IMPORTA obtenerPedidos!
 
 router.post('/', crearPedido);
 router.get('/', obtenerPedidos); // ← ¡AHORA SÍ ESTÁ DEFINIDA!
 
-module.exports = router;
+export default router;

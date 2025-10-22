@@ -1,9 +1,9 @@
 // src/seed/index.js
-const bcrypt = require('bcrypt');
-const { prisma } = require('../db/prismaClient');
-const { config } = require('../config/env');
+import bcrypt from 'bcrypt';
+import { prisma } from '../db/prismaClient.js';
+import { config } from '../config/env.js';
 
-async function seed() {
+export async function seed() {
   // Ensure default role exists
   let defaultRole = await prisma.rOLES.findUnique({ where: { nombre_rol: config.defaultRoleName } });
   if (!defaultRole) {
@@ -34,5 +34,3 @@ async function seed() {
     }
   }
 }
-
-module.exports = { seed };

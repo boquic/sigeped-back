@@ -1,18 +1,25 @@
 // src/middlewares/auth.middleware.js
-const jwt = require('jsonwebtoken');
-const { prisma } = require('../db/prismaClient');
-const { config } = require('../config/env');
+import jwt from "jsonwebtoken";
+import { config } from "../config/env.js";
 
-function authenticateJWT(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.status(401).json({ error: { code: 'Unauthorized', message: 'Missing token' } });
+/**
+ * Verifica el token JWT y guarda los datos del usuario en req.user
+ */
+export function authenticateJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
 
-  jwt.verify(token, config.jwt.accessSecret, (err, payload) => {
-    if (err) return res.status(401).json({ error: { code: 'Unauthorized', message: 'Invalid token' } });
-    req.user = payload; // { id_usuario, id_rol, nombre_rol, email }
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token no proporcionado o inválido." });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, config.jwt.accessSecret);
+    req.user = decoded; // guarda los datos del usuario en la request
     next();
-  });
+  } catch (err) {
+    console.error("❌ Error verificando token JWT:", err.message);
+    res.status(403).json({ error: "Token inválido o expirado." });
+  }
 }
-
-module.exports = { authenticateJWT };

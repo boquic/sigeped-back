@@ -1,13 +1,13 @@
 // src/services/auth.service.js
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const { prisma } = require('../db/prismaClient');
-const { config } = require('../config/env');
-const { signAccessToken, issueRefreshToken, rotateRefreshToken, revokeToken, revokeTokenFamily } = require('./token.service');
-const { findByIdentifier, findByEmail, createUser, updateLastAccess, setPassword } = require('./user.service');
-const { sendPasswordReset } = require('./email.service');
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import { prisma } from '../db/prismaClient.js';
+import { config } from '../config/env.js';
+import { signAccessToken, issueRefreshToken, rotateRefreshToken, revokeToken, revokeTokenFamily } from './token.service.js';
+import { findByIdentifier, findByEmail, createUser, updateLastAccess, setPassword } from './user.service.js';
+import { sendPasswordReset } from './email.service.js';
 
-async function ensureDefaultRole() {
+export async function ensureDefaultRole() {
   let role = await prisma.rOLES.findUnique({ where: { nombre_rol: config.defaultRoleName } });
   if (!role) {
     role = await prisma.rOLES.create({ data: { nombre_rol: config.defaultRoleName, descripcion: 'Default role', permisos: {} } });
@@ -15,7 +15,7 @@ async function ensureDefaultRole() {
   return role;
 }
 
-async function register({ username, email, password, telefono }) {
+export async function register({ username, email, password, telefono }) {
   const role = await ensureDefaultRole();
   const existing = await prisma.uSUARIOS.findFirst({ where: { OR: [{ email }, { username }] } });
   if (existing) {
@@ -29,7 +29,7 @@ async function register({ username, email, password, telefono }) {
   return { user: publicUser(user), accessToken, refreshToken };
 }
 
-async function login({ identifier, password }, ua, ip) {
+export async function login({ identifier, password }, ua, ip) {
   const user = await findByIdentifier(identifier);
   if (!user) return invalidCreds();
   if (!user.activo) return makeError(403, 'UserInactive', 'User is inactive');
@@ -41,7 +41,7 @@ async function login({ identifier, password }, ua, ip) {
   return { user: publicUser(user), accessToken, refreshToken };
 }
 
-async function refresh(oldToken, ua, ip) {
+export async function refresh(oldToken, ua, ip) {
   const rotated = await rotateRefreshToken(oldToken, ua, ip);
   if (rotated?.error) {
     await revokeTokenFamily(oldToken);
@@ -52,30 +52,30 @@ async function refresh(oldToken, ua, ip) {
   return { accessToken, refreshToken: rotated.refreshToken };
 }
 
-async function logout(token) {
+export async function logout(token) {
   await revokeToken(token);
 }
 
-async function me(userId) {
+export async function me(userId) {
   const user = await prisma.uSUARIOS.findUnique({ where: { id_usuario: userId }, include: { rol: true } });
   return { user: publicUser(user) };
 }
 
-async function forgotPassword(email) {
+export async function forgotPassword(email) {
   const user = await findByEmail(email);
   if (!user) return; // avoid email enumeration
   const tokenPlain = crypto.randomBytes(32).toString('hex');
-  const tokenHash = await require('bcrypt').hash(tokenPlain, 11);
+  const tokenHash = await bcrypt.hash(tokenPlain, 11);
   const expires = new Date(Date.now() + 60 * 60 * 1000);
   await prisma.passwordResetToken.create({ data: { userId: user.id_usuario, token_hash: tokenHash, expires_at: expires } });
   await sendPasswordReset(user.email, tokenPlain);
 }
 
-async function resetPassword(tokenPlain, newPassword) {
+export async function resetPassword(tokenPlain, newPassword) {
   const now = new Date();
   const tokens = await prisma.passwordResetToken.findMany({ where: { used_at: null, expires_at: { gt: now } } });
   for (const t of tokens) {
-    const match = await require('bcrypt').compare(tokenPlain, t.token_hash);
+    const match = await bcrypt.compare(tokenPlain, t.token_hash);
     if (match) {
       await setPassword(t.userId, newPassword);
       await prisma.passwordResetToken.update({ where: { id: t.id }, data: { used_at: new Date() } });
@@ -107,4 +107,3 @@ function makeError(status, code, message, details) {
 
 function invalidCreds() { return makeError(401, 'InvalidCredentials', 'Invalid credentials'); }
 
-module.exports = { register, login, refresh, logout, me, forgotPassword, resetPassword, ensureDefaultRole };

@@ -19,7 +19,7 @@ for (const key of required) {
   }
 }
 
-const config = {
+export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '4000', 10),
   dbUrl: process.env.DATABASE_URL,
@@ -48,5 +48,3 @@ const config = {
     adminUsername: process.env.SEED_ADMIN_USERNAME,
   },
 };
-
-module.exports = { config };
