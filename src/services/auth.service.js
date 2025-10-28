@@ -38,7 +38,8 @@ export async function login({ identifier, password }, ua, ip) {
   await updateLastAccess(user.id_usuario);
   const accessToken = signAccessToken(user);
   const refreshToken = await issueRefreshToken(user.id_usuario, ua, ip);
-  return { user: publicUser(user), accessToken, refreshToken };
+  // Include token alias for compatibility with clients expecting { user, token }
+  return { user: publicUser(user), token: accessToken, accessToken, refreshToken };
 }
 
 export async function refresh(oldToken, ua, ip) {

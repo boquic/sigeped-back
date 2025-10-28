@@ -29,12 +29,12 @@ export const config = {
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
-    accessTtl: process.env.ACCESS_TOKEN_TTL || '15m',
+    accessTtl: process.env.ACCESS_TOKEN_TTL || '1d',
     refreshTtl: process.env.REFRESH_TOKEN_TTL || '7d',
   },
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3000').split(','),
   frontendBaseUrl: process.env.FRONTEND_BASE_URL || 'http://localhost:3000',
-  defaultRoleName: process.env.DEFAULT_ROLE_NAME || 'operario',
+  defaultRoleName: process.env.DEFAULT_ROLE_NAME || 'trabajador',
   smtp: {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined,

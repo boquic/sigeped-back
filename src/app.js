@@ -17,10 +17,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Montaje de rutas
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-app.use("/admin", adminRoutes);
+// ✅ Montaje de rutas (con prefijo /api)
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/pedidos", pedidoRoutes); // 👈 Ruta del sistema de pedidos
 
 // Nota: El arranque del servidor se realiza en server.js

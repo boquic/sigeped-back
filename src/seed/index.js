@@ -16,6 +16,16 @@ export async function seed() {
     adminRole = await prisma.rOLES.create({ data: { nombre_rol: 'admin', descripcion: 'Administrator', permisos: { manageUsers: true, admin: true } } });
   }
 
+  // Ensure trabajador role exists explicitly (two-role model)
+  const trabajador = await prisma.rOLES.findUnique({ where: { nombre_rol: 'trabajador' } });
+  const operario = await prisma.rOLES.findUnique({ where: { nombre_rol: 'operario' } });
+  if (!trabajador && operario) {
+    // rename existing 'operario' to 'trabajador' to keep existing user links
+    await prisma.rOLES.update({ where: { id_rol: operario.id_rol }, data: { nombre_rol: 'trabajador' } });
+  } else if (!trabajador) {
+    await prisma.rOLES.create({ data: { nombre_rol: 'trabajador', descripcion: 'Empleado', permisos: {} } });
+  }
+
   // Seed admin user if env provided
   const { adminEmail, adminPassword, adminUsername } = config.seed;
   if (adminEmail && adminPassword && adminUsername) {
