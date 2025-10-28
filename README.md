@@ -97,6 +97,14 @@ docker compose up -d --build
 - API: `http://localhost:4000`
 - PostgreSQL: `localhost:5432` (usuario `postgres`, password `postgres`, DB `appdb`)
 
+## Prisma Studio
+
+Levantar Prisma Studio en localhost
+
+```sh
+npx prisma studio
+```
+
 ## Scripts útiles
 
 - `npm run prisma:migrate`: Ejecuta migraciones Prisma
